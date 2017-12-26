@@ -58,7 +58,7 @@ public class DocumentActivity extends Activity
 	protected String title;
 	protected ArrayList<OutlineActivity.Item> flatOutline;
 	protected float layoutW, layoutH, layoutEm;
-	protected float displayDPI;
+	protected float displayDPI, sharpness;
 	protected int canvasW, canvasH;
 
 	protected View currentBar;
@@ -95,6 +95,7 @@ public class DocumentActivity extends Activity
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		displayDPI = metrics.densityDpi;
+		sharpness = Math.min(2.f, Math.max(1.f, displayDPI / 72.f / 2));
 
 		setContentView(R.layout.document_activity);
 		actionBar = findViewById(R.id.action_bar);
@@ -143,6 +144,7 @@ public class DocumentActivity extends Activity
 
 		pageView = (PageView)findViewById(R.id.page_view);
 		pageView.setActionListener(this);
+		pageView.setSharpnessCorrection(sharpness);
 
 		pageLabel = (TextView)findViewById(R.id.page_label);
 		pageSeekbar = (SeekBar)findViewById(R.id.page_seekbar);
@@ -520,6 +522,11 @@ public class DocumentActivity extends Activity
 		});
 	}
 
+	/** Increases the size of a dimension so that the page rendered more sharp */
+	private int sharp(float d) {
+		return Math.round(d * sharpness);
+	}
+
 	protected void loadPage() {
 		final int pageNumber = currentPage;
 		stopSearch = true;
@@ -534,9 +541,9 @@ public class DocumentActivity extends Activity
 					Log.i(APP, "draw page " + pageNumber);
 					Matrix ctm;
 					if (fitPage)
-						ctm = AndroidDrawDevice.fitPage(page, canvasW, canvasH);
+						ctm = AndroidDrawDevice.fitPage(page, sharp(canvasW), sharp(canvasH));
 					else
-						ctm = AndroidDrawDevice.fitPageWidth(page, canvasW);
+						ctm = AndroidDrawDevice.fitPageWidth(page, sharp(canvasW));
 					bitmap = AndroidDrawDevice.drawPage(page, ctm);
 					links = page.getLinks();
 					if (links != null)

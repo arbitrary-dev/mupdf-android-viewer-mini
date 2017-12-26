@@ -45,9 +45,7 @@ public class PageView extends View implements
 		detector = new GestureDetector(ctx, this);
 		scaleDetector = new ScaleGestureDetector(ctx, this);
 
-		viewScale = 1;
-		minScale = 1;
-		maxScale = 2;
+		setSharpnessCorrection(1.f);
 
 		linkPaint = new Paint();
 		linkPaint.setARGB(32, 0, 0, 255);
@@ -279,5 +277,13 @@ public class PageView extends View implements
 		if (hits != null && hits.length > 0)
 			for (Rect b : hits)
 				canvas.drawRect(b.x0, b.y0, b.x1, b.y1, hitPaint);
+	}
+
+  // TODO port chunked page rendering with high resolution from plain MuPDF
+  /** Corrects scaling for "sharpened" dimensions of a page */
+	public void setSharpnessCorrection(float sharpness) {
+		minScale = 1 / sharpness;
+		maxScale = 3 / sharpness;
+		viewScale = minScale;
 	}
 }
