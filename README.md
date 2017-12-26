@@ -114,11 +114,7 @@ environment with a C compiler and GNU Make.
 Either clone the original project with the --recursive flag, or initialize all
 the submodules recursively by hand:
 
-	mupdf-mini $ git submodule update --init
-	mupdf-mini $ cd jni
-	mupdf-mini/jni $ git submodule update --init
-	mupdf-mini/jni $ cd libmupdf
-	mupdf-mini/jni/libmupdf $ git submodule update --init
+	mupdf-mini $ git submodule update --init --recursive
 
 Then you need to run the 'make generate' step in the libmupdf directory:
 
