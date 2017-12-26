@@ -1,5 +1,11 @@
 # MuPDF Mini Viewer
 
+## Changes from original repo
+
+1. Sharper documents rendering on high DPI devices
+
+## Description
+
 This project is a minimalist Android app that uses the MuPDF library to view
 PDF, XPS, CBZ, unprotected EPUB, and FB2 documents.
 
