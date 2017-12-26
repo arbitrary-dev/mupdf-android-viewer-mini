@@ -612,6 +612,7 @@ public class DocumentActivity extends Activity
 		}
 	}
 
+	// TODO adaptive, so that user don't scroll again on new page
 	public void goForward() {
 		if (currentPage < pageCount - 1) {
 			currentPage ++;

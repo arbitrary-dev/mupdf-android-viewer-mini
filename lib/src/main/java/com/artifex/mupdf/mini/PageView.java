@@ -203,7 +203,7 @@ public class PageView extends View implements
 	public void goBackward() {
 		scroller.forceFinished(true);
 		if (scrollY <= 0) {
-			if (scrollX <= 0) {
+			if (scrollX <= canvasW / 2) {
 				actionListener.goBackward();
 				return;
 			}
@@ -217,7 +217,7 @@ public class PageView extends View implements
 	public void goForward() {
 		scroller.forceFinished(true);
 		if (scrollY + canvasH >= bitmapH) {
-			if (scrollX + canvasW >= bitmapW) {
+			if (scrollX + canvasW >= bitmapW - canvasW / 2) {
 				actionListener.goForward();
 				return;
 			}

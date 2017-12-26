@@ -3,6 +3,7 @@
 ## Changes from original repo
 
 1. Sharper documents rendering on high DPI devices
+2. Improved page flip
 
 ## Description
 
