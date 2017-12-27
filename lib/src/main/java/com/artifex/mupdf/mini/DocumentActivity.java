@@ -55,6 +55,7 @@ public class DocumentActivity extends Activity
 	protected boolean hasLoaded;
 	protected boolean isReflowable;
 	protected boolean fitPage;
+	protected boolean invertColors;
 	protected String title;
 	protected ArrayList<OutlineActivity.Item> flatOutline;
 	protected float layoutW, layoutH, layoutEm;
@@ -138,6 +139,7 @@ public class DocumentActivity extends Activity
 		prefs = getPreferences(Context.MODE_PRIVATE);
 		layoutEm = prefs.getFloat("layoutEm", 8);
 		fitPage = prefs.getBoolean("fitPage", false);
+		invertColors = prefs.getBoolean("invertColors", false);
 		currentPage = prefs.getInt(key, 0);
 		searchHitPage = -1;
 		hasLoaded = false;
@@ -223,7 +225,9 @@ public class DocumentActivity extends Activity
 		zoomButton = findViewById(R.id.zoom_button);
 		zoomButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				fitPage = !fitPage;
+				// FIXME
+//				fitPage = !fitPage;
+				invertColors = !invertColors;
 				loadPage();
 			}
 		});
@@ -341,6 +345,7 @@ public class DocumentActivity extends Activity
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putFloat("layoutEm", layoutEm);
 		editor.putBoolean("fitPage", fitPage);
+		editor.putBoolean("invertColors", invertColors);
 		editor.putInt(key, currentPage);
 		editor.commit();
 	}
@@ -545,6 +550,10 @@ public class DocumentActivity extends Activity
 					else
 						ctm = AndroidDrawDevice.fitPageWidth(page, sharp(canvasW));
 					bitmap = AndroidDrawDevice.drawPage(page, ctm);
+					Log.d("DBG", "bitmap: " + bitmap);
+					Log.d("DBG", "invertColors: " + invertColors);
+					if (invertColors)
+						invert();
 					links = page.getLinks();
 					if (links != null)
 						for (Link link : links)
@@ -568,6 +577,39 @@ public class DocumentActivity extends Activity
 				pageSeekbar.setMax(pageCount - 1);
 				pageSeekbar.setProgress(pageNumber);
 				wentBack = false;
+			}
+			private void invert() {
+				Log.d("DBG", "invert1");
+				if (bitmap == null)
+					return;
+				Log.d("DBG", "invert2");
+				int width = bitmap.getWidth();
+				int height = bitmap.getHeight();
+				for (int x = 0; x < width; x++)
+					for (int y = 0; y < height; y++) {
+//						Log.d("DBG", "invert3: " + x + " " + y);
+						int c1 = bitmap.getPixel(x, y);
+						int r = (c1 >> 16) & 0xFF;
+						int g = (c1 >> 8) & 0xFF;
+						int b = c1 & 0xFF;
+
+						// invert
+						r = 255 - r;
+						g = 255 - g;
+						b = 255 - b;
+
+						// gamma
+						double t = 1 / 1.4;
+						r = Math.min(255, (int)((255 * Math.pow(r / 255.0, 1 / t)) + 0.5));
+						g = Math.min(255, (int)((255 * Math.pow(g / 255.0, 1 / t)) + 0.5));
+						b = Math.min(255, (int)((255 * Math.pow(b / 255.0, 1 / t)) + 0.5));
+
+						int c2 = r << 16;
+						c2 |= g << 8;
+						c2 |= b;
+						bitmap.setPixel(x, y, c2);
+					}
+				Log.d("DBG", "invert4");
 			}
 		});
 	}
