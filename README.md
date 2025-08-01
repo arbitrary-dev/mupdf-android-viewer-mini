@@ -1,3 +1,12 @@
+**Upgrades introduced:**
+
+1. Complete fullscreen mode (have some issues in landscape mode)
+2. Page turning when close to the edges
+3. Different page navigation layout (top/left edges to go backward, right/bottom
+   edges to go forward, bottom-left corner to go backwards and top-right corner
+   to go forward)
+4. Horizontal skip encompasses full canvas width
+
 # MuPDF Mini Viewer
 
 This project is a minimalist Android app that uses the MuPDF library to view
