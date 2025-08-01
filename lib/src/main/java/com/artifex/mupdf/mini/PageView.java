@@ -229,7 +229,7 @@ public class PageView extends View implements
 					actionListener.goBackward();
 				return;
 			}
-			scroller.startScroll(scrollX, scrollY, -canvasW * 9 / 10, bitmapH - canvasH - scrollY, 500);
+			scroller.startScroll(scrollX, scrollY, -canvasW, bitmapH - canvasH - scrollY, 500);
 		} else {
 			scroller.startScroll(scrollX, scrollY, 0, -canvasH * 9 / 10, 250);
 		}
@@ -245,7 +245,7 @@ public class PageView extends View implements
 					actionListener.goForward();
 				return;
 			}
-			scroller.startScroll(scrollX, scrollY, canvasW * 9 / 10, -scrollY, 500);
+			scroller.startScroll(scrollX, scrollY, canvasW, -scrollY, 500);
 		} else {
 			scroller.startScroll(scrollX, scrollY, 0, canvasH * 9 / 10, 250);
 		}
