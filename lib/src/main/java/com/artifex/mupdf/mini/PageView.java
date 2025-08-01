@@ -160,11 +160,19 @@ public class PageView extends View implements
 			}
 		}
 		if (!foundLink) {
-			float a = canvasW / 3;
-			float b = a * 2;
-			if (x <= a) goBackward();
-			if (x >= b) goForward();
-			if (x > a && x < b && actionListener != null) actionListener.toggleUI();
+			float a = (canvasW < canvasH ? canvasW : canvasH) / 4;
+			float b = canvasW - a;
+			float c = a;
+			float d = canvasH - a;
+			if (x <= a) {
+				goBackward();
+			} else if (y >= d || x >= b) {
+				goForward();
+			} else if (y <= c) {
+				goBackward();
+			} else if (actionListener != null) {
+				actionListener.toggleUI();
+			}
 		}
 		invalidate();
 		return true;
