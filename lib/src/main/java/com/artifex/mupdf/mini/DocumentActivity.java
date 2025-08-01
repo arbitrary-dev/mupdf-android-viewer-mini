@@ -71,7 +71,7 @@ public class DocumentActivity extends Activity
 	protected float layoutW, layoutH, layoutEm;
 	protected float displayDPI;
 	protected int canvasW, canvasH;
-	protected float pageZoom;
+	protected float pageZoom = 1;
 
 	protected View currentBar;
 	protected PageView pageView;
@@ -150,14 +150,13 @@ public class DocumentActivity extends Activity
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		displayDPI = metrics.densityDpi;
 
 		setContentView(R.layout.document_activity);
+
 		actionBar = findViewById(R.id.action_bar);
 		searchBar = findViewById(R.id.search_bar);
 		navigationBar = findViewById(R.id.navigation_bar);
@@ -357,6 +356,8 @@ public class DocumentActivity extends Activity
 				layoutPopupMenu.show();
 			}
 		});
+
+		toggleUI();
 	}
 
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -385,7 +386,6 @@ public class DocumentActivity extends Activity
 	}
 
 	public void onPageViewSizeChanged(int w, int h) {
-		pageZoom = 1;
 		canvasW = w;
 		canvasH = h;
 		layoutW = canvasW * 72 / displayDPI;
@@ -744,12 +744,33 @@ public class DocumentActivity extends Activity
 	}
 
 	public void toggleUI() {
+		WindowManager.LayoutParams attrs = getWindow().getAttributes();
 		if (navigationBar.getVisibility() == View.VISIBLE) {
+			attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN
+				| WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+				| WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+			getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+			getWindow().getDecorView()
+				.setSystemUiVisibility(
+					View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+					| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+					| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+					| View.SYSTEM_UI_FLAG_FULLSCREEN
+					| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+			getWindow().setDecorFitsSystemWindows(false);
 			currentBar.setVisibility(View.GONE);
 			navigationBar.setVisibility(View.GONE);
 			if (currentBar == searchBar)
 				hideKeyboard();
 		} else {
+			attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN
+				& ~WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+				& ~WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+			getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+			getWindow().getDecorView()
+				.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+			getWindow().setDecorFitsSystemWindows(true);
 			currentBar.setVisibility(View.VISIBLE);
 			navigationBar.setVisibility(View.VISIBLE);
 			if (currentBar == searchBar) {
@@ -757,6 +778,7 @@ public class DocumentActivity extends Activity
 				showKeyboard();
 			}
 		}
+		getWindow().setAttributes(attrs);
 	}
 
 	public void goBackward() {

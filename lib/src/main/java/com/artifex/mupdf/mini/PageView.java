@@ -32,6 +32,8 @@ public class PageView extends View implements
 	protected String[] linkURIs;
 	protected Quad[][] hits;
 	protected boolean showLinks;
+	protected boolean isToggling;
+	protected int adjustScrollY;
 
 	protected GestureDetector detector;
 	protected ScaleGestureDetector scaleDetector;
@@ -73,6 +75,14 @@ public class PageView extends View implements
 		errorPath.lineTo(-100, 100);
 	}
 
+	public void onAttachedToWindow() {
+		int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0) {
+			// Adjust it by status bar height during UI toggling
+			adjustScrollY = getResources().getDimensionPixelSize(resourceId);
+		}
+	}
+
 	public void setActionListener(DocumentActivity l) {
 		actionListener = l;
 	}
@@ -100,10 +110,11 @@ public class PageView extends View implements
 		bitmapW = (int)(bitmap.getWidth() * viewScale / zoom);
 		bitmapH = (int)(bitmap.getHeight() * viewScale / zoom);
 		scroller.forceFinished(true);
-		if (pageScale == zoom) {
+		if (!isToggling && pageScale == zoom) {
 			scrollX = wentBack ? bitmapW - canvasW : 0;
 			scrollY = wentBack ? bitmapH - canvasH : 0;
 		}
+		isToggling = false;
 		pageScale = zoom;
 		invalidate();
 	}
@@ -170,6 +181,9 @@ public class PageView extends View implements
 			} else if (x <= a) {
 				goBackward();
 			} else if (actionListener != null) {
+				isToggling = true;
+				scrollY += adjustScrollY;
+				adjustScrollY *= -1;
 				actionListener.toggleUI();
 			}
 		}

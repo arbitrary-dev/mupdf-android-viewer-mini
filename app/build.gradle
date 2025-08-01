@@ -15,7 +15,10 @@ android {
 	compileSdkVersion 33
 	defaultConfig {
 		minSdkVersion 21
-		targetSdkVersion 35
+		// FIXME: `targetSdkVersion 35` needs some additional insets handling
+		//        for root view, and it's not pageView, as it may seem.
+		//        Otherwise layout gets rendered behind the navigation bar.
+		targetSdkVersion 34
 		versionName '1.26.10a'
 		versionCode 169
 	}
