@@ -27,6 +27,7 @@ public class PageView extends View implements
 	protected Bitmap bitmap;
 	protected int bitmapW, bitmapH;
 	protected int canvasW, canvasH;
+	protected boolean scrollLockX, scrollLockY;
 	protected int scrollX, scrollY;
 	protected Rect[] linkBounds;
 	protected String[] linkURIs;
@@ -48,7 +49,45 @@ public class PageView extends View implements
 		super(ctx, atts);
 
 		scroller = new Scroller(ctx);
-		detector = new GestureDetector(ctx, this);
+
+		detector = new GestureDetector(ctx, this) {
+			private static final int EDGE_THRESHOLD_PX = 64;
+
+			public boolean onTouchEvent (MotionEvent ev) {
+				switch (ev.getActionMasked()) {
+					case MotionEvent.ACTION_DOWN:
+						float x = ev.getX();
+						float y = ev.getY();
+
+						int a = EDGE_THRESHOLD_PX;
+						int b = canvasH - EDGE_THRESHOLD_PX;
+						int c = canvasW - EDGE_THRESHOLD_PX;
+
+						if (x > a && y < a || x < b && y > b) {
+							scrollLockX = true;
+						} else if (x < a || x > c) {
+							scrollLockY = true;
+						} else {
+							scrollLockX = false;
+							scrollLockY = false;
+						}
+						break;
+
+					case MotionEvent.ACTION_UP:
+						// Keep the lock mode active for onFling(), which is triggered by ACTION_UP.
+						break;
+
+					case MotionEvent.ACTION_CANCEL:
+						scrollLockX = false;
+						scrollLockY = false;
+						break;
+				}
+
+				super.onTouchEvent(ev);
+
+				return true;
+			}
+		};
 		scaleDetector = new ScaleGestureDetector(ctx, this);
 
 		pageScale = 1;
@@ -193,8 +232,10 @@ public class PageView extends View implements
 
 	public synchronized boolean onScroll(MotionEvent e1, MotionEvent e2, float dx, float dy) {
 		if (bitmap != null) {
-			scrollX += (int)dx;
-			scrollY += (int)dy;
+			if (!scrollLockX)
+				scrollX += (int)dx;
+			if (!scrollLockY)
+				scrollY += (int)dy;
 			scroller.forceFinished(true);
 			invalidate();
 		}
@@ -206,7 +247,15 @@ public class PageView extends View implements
 			int maxX = bitmapW > canvasW ? bitmapW - canvasW : 0;
 			int maxY = bitmapH > canvasH ? bitmapH - canvasH : 0;
 			scroller.forceFinished(true);
-			scroller.fling(scrollX, scrollY, (int)-dx, (int)-dy, 0, maxX, 0, maxY);
+			scroller.fling(
+					scrollX,
+					scrollY,
+					scrollLockX ? 0 : (int)-dx,
+					scrollLockY ? 0 : (int)-dy,
+					0,
+					maxX,
+					0,
+					maxY);
 			invalidate();
 		}
 		return true;
